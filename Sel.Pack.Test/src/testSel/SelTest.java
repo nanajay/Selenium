@@ -1,5 +1,7 @@
 package testSel;
 
+import java.net.MalformedURLException;
+
 import operaSeleniumWebDriverSetUp.OperaSelSetUp;
 
 import org.testng.annotations.Test;
@@ -23,23 +25,24 @@ public class SelTest
 	
 	/**
 	 * @param args
+	 * @throws MalformedURLException 
 	 */
 	@Test
-	public void runTest()
+	public void runTest() throws MalformedURLException
 	{
 		// TODO Auto-generated method stub
 		
 		SelTest MyObjeect = new SelTest();
 		//MyObjeect.testIE();
-		MyObjeect.testChrome();
-		MyObjeect.testIE();
-		//MyObjeect.testFireFox();
+		//MyObjeect.testChrome();
+		//MyObjeect.testIE();
+		MyObjeect.testFireFox();
 		//MyObjeect.testOpera();
 		//MyObjeect.testSafari();
 
 	}
 	
-	private void testFireFox()
+	private void testFireFox() throws MalformedURLException
 	{
 		fi.firefoxSetUp();
 		

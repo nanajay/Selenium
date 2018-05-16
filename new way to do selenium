@@ -1,0 +1,200 @@
+before selenium is set up, see below things to do
+1 - download selenium web server 
+2 - download chrome and IE DRIVER 
+3 - download testng if the tester prefer to run it with testng
+--------------------------------------------------------------------------
+launch selenium set up
+
+package codes;
+
+import java.util.ResourceBundle;
+
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import org.testng.annotations.DataProvider;
+
+
+public class LaunchBrowserTest 
+{
+	 //WebDriver testDriver = null;
+	ChromeBrowserSetUp chromeClass = new ChromeBrowserSetUp();
+	IEBrowserSetUp IEClass = new IEBrowserSetUp();
+	ReadDataFromExcel iReadData = new ReadDataFromExcel();
+	ResourceBundle dataSource = null;
+	
+	public LaunchBrowserTest()
+	{	
+		dataSource = ResourceBundle.getBundle("dataSource");	
+	}
+
+	@BeforeMethod
+	public void beforeMethod() 
+	{
+		IEClass.launchIEBrowser(dataSource.getString("feature3stagingsystestURL"),dataSource.getString("feature3password"),dataSource.getString("feature3username"));
+	}
+
+	@Test
+	public void doTest()
+	{
+		IEClass.ieNavToRI10();
+	}
+ 
+
+}
+----------------------------------------------------------------------------------------------
+
+log on set up
+package codes;
+
+import java.util.concurrent.TimeUnit;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+
+public class LogOn 
+{	
+	
+	public void logIn(String pass, String username, WebDriver driver)
+	{
+		driver.findElement(By.id("cred1")).clear();
+		driver.findElement(By.id("cred1")).sendKeys(username);
+		driver.findElement(By.id("cred2")).clear();
+		driver.findElement(By.id("cred2")).sendKeys(pass);
+		driver.findElement(By.id("btn_lnk_btnLogon")).click();
+		waitTenSeconds(driver);
+	}
+	
+
+	public void waitTenSeconds(WebDriver driver) 
+	  {
+		driver.manage().timeouts().implicitlyWait(1000000000, TimeUnit.SECONDS);
+	  }
+	
+
+}
+-------------------------------------------------------------------------------------------
+
+IE SET UP 
+
+package codes;
+
+import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+
+public class IEBrowserSetUp
+{
+	//SearchRisk ISearchRisk = new SearchRisk();
+	LogOn signOn = new LogOn();
+	public WebDriver testDriver = null;
+	SearchRisk iSearchRisk = new SearchRisk();
+	
+	ResourceBundle dataSource = null;
+	
+	public IEBrowserSetUp()
+	{	
+		dataSource = ResourceBundle.getBundle("dataSource");	
+	}
+	
+	
+	public void launchIEBrowser(String URL, String pass, String username)
+	{
+		System.setProperty("webdriver.ie.driver",dataSource.getString("IEdriverPath"));
+		DesiredCapabilities ieCapabilities = DesiredCapabilities.internetExplorer();  
+		ieCapabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
+		testDriver = new InternetExplorerDriver(ieCapabilities);
+		System.out.println("Start IE");
+		testDriver.manage().window().maximize();
+		testDriver.navigate().to(dataSource.getString("feature3stagingsystestURL"));
+		System.out.println("about to logon");
+		signOn.logIn(pass, username, testDriver);
+		//this.ieNavToRI10();	
+		System.out.println("logon complete");
+	}
+	
+	
+	public void ieNavToRI10()
+	{
+		iSearchRisk.NavToRI10(testDriver);
+		//iSearchRisk.findRisk(testDriver);
+		testDriver.manage().timeouts().implicitlyWait(60, TimeUnit.SECONDS);
+	}
+	
+	
+}
+----------------------------------------------------------------------------------------
+SAMPLE EXAMPLE OF RESOURCE - THIS IS WHERE ALL TEST LINKS AND USERNAME AND MAYBE TEST DATA CAN BE SET UP 
+
+***note this fiel get created under resorce folder****
+ChromedriverPath=C:\\Users\\jadjei\\workspace\\RegressionSelTest\\chromedriver_2.25.exe
+IEdriverPath=C:\\Users\\jadjei\\workspace\\Regression  Pack\\IEDriverServer.exe
+corestagingusername=jadjeidcr
+corestagingpassword=Salmon00
+corestagingsystestURL=http://core.systest.sabrefish.domain/riskwrite3_stg/nav
+feature2tagingusername=jadjeidcr
+feature2stagingpassword=Salmon000
+feature2stagingsystestURL=https://feature002.systest.sabrefish.domain/feature002_stg/nav
+feature2accountcoreULR=https://featureaccounts.systest.sabrefish.domain/accounts_core_stg/nav
+feature2coreaccountsusername=jadjeibrokerdcr1 
+feature2coreaccountspassword=Salmon000
+feature3stagingsystestURL=https://feature003.systest.sabrefish.domain/feature003_stg/nav
+feature3username=jadjeidcr
+feature3password=Salmon000
+--------------------------------------------------------------------------------
+chrome set up
+
+package codes;
+
+import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+
+public class ChromeBrowserSetUp
+{
+	FieldDefinition fieldD = new FieldDefinition();
+	RI01 ScreenRI01 = new RI01(); 
+	LogOn signOn = new LogOn();
+	public WebDriver testDriver = null;
+	ResourceBundle dataSource = null;
+	
+	public ChromeBrowserSetUp()
+	{	
+		dataSource = ResourceBundle.getBundle("dataSource");	
+	}
+	
+	
+	public void launchChrome(String URL,String pass, String username)
+	{
+		System.setProperty("webdriver.chrome.driver",fieldD.ChromedriverPath);
+		DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("test-type");
+		capabilities.setCapability(ChromeOptions.CAPABILITY, options);
+		//ChromeDriver driver = new ChromeDriver(capabilities);
+		testDriver  = new ChromeDriver(capabilities);
+		System.out.println("Start IE");
+		testDriver.manage().window().maximize();
+		testDriver.navigate().to(dataSource.getString("corestagingsystestURL"));
+		System.out.println("about to logon");
+		signOn.logIn(pass, username, testDriver);
+		System.out.println("logon complete");
+		
+	}
+	
+	 
+	
+	public void waitTenSeconds(WebDriver driver)
+	 {
+		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+	 }
+
+	
+}
+	
+--------------------------------------------------------------------------------------------------

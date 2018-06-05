@@ -1,0 +1,180 @@
+package codes;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+
+
+public class Action {
+
+	long start=0;
+	
+	public void actionClick(WebDriver driver, String path)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElement(By.xpath(path)).click(); break; } 
+		catch (NoSuchElementException e) {}
+		catch (WebDriverException e){}}
+	}
+	
+	public void actionSendKeysByName(WebDriver driver, String name, String value)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElement(By.name(name)).sendKeys(value); break; } 
+		catch (NoSuchElementException e) {}
+		catch (WebDriverException e){}}
+	}
+	
+	public void actionClickByName(WebDriver driver, String name)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElement(By.name(name)).click(); break; } 
+		catch (NoSuchElementException e) {}
+		catch (WebDriverException e){}}
+	}
+	
+	public void actionSendKeys(WebDriver driver, String path, String value)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElement(By.xpath(path)).sendKeys(value); break; } 
+		catch (WebDriverException e){}}
+	}
+	
+	
+	public void actionSendENTER(WebDriver driver, String path)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElement(By.xpath(path)).sendKeys(Keys.ENTER); break; } 
+			catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	public void actionSendTAB(WebDriver driver, String path)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElement(By.xpath(path)).sendKeys(Keys.TAB); break; } 
+			catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	public void actionSendDOWN(WebDriver driver, String path)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElement(By.xpath(path)).sendKeys(Keys.DOWN); break; } 
+			catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	public void actionClickIndex(WebDriver driver, String path, int index)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElements(By.xpath(path)).get(index).click(); break; } 
+			catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	public void actionENTERIndex(WebDriver driver, String path, int index)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElements(By.xpath(path)).get(index).sendKeys(Keys.ENTER); break; } 
+			catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	public void actionSendKeysIndex(WebDriver driver, String path, int index, String value)
+	{
+		start = System.currentTimeMillis();	while (System.currentTimeMillis()-start < 10000) { try {
+			driver.findElements(By.xpath(path)).get(index).sendKeys(value); break; } 
+			catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	public void actionSendKeysSearch(WebDriver driver, String path, String search, String value)
+	{
+		start = System.currentTimeMillis();
+		while (System.currentTimeMillis()-start < 10000) { try {
+			List<WebElement> as = driver.findElements(By.xpath(path));
+			for (WebElement a : as) 
+			{
+				if (a.getText().equals(search))
+				{
+					a.sendKeys(value);
+					break;
+				}
+			} break; } 
+			catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	
+	public void actionClickSearch(WebDriver driver, String path, String search)
+	{
+		start = System.currentTimeMillis();
+		while (System.currentTimeMillis()-start < 10000) { try {
+			List<WebElement> as = driver.findElements(By.xpath(path));
+			for (WebElement a : as) 
+			{
+				String test1=a.getText();
+				int test2 = as.size();
+				if (a.getText().equals(search))
+				{
+					a.click();
+					break;
+				}
+			} break; } catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	public void actionClickSearchDOWN(WebDriver driver, String path, String search)
+	{
+		start = System.currentTimeMillis();
+		while (System.currentTimeMillis()-start < 10000) { try {
+			List<WebElement> as = driver.findElements(By.xpath(path));
+			for (WebElement a : as) 
+			{
+				String test1=a.getText();
+				int test2 = as.size();
+				if (a.getText().equals(search))
+				{
+					a.sendKeys(Keys.ENTER);
+					break;
+				}
+				a.sendKeys(Keys.DOWN);
+				a.sendKeys(Keys.RETURN);
+			} break; } catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	
+	 public void navToRI05(WebDriver driver)
+	 {
+		  this.waitTenSeconds(driver);
+		  driver.findElement(By.id("btn_lnk_RI01Continue")).click();
+	 }
+	 
+	 
+	 public void navToRI02(WebDriver driver)
+	 {
+		JavascriptExecutor js = null;
+		js = (JavascriptExecutor) driver; 
+		js.executeScript("javascript:selectQuote('0')");
+	 }
+	 
+	 public void navToRI03(WebDriver driver)
+	 {
+		 this.waitTenSeconds(driver);
+		 driver.findElement(By.xpath( "(//button[contains(text(),'Continue')])")).click();
+	 }
+	 public void waitTenSeconds(WebDriver driver)
+	  {
+		 driver.manage().timeouts().implicitlyWait(50, TimeUnit.SECONDS);
+	  }
+
+}

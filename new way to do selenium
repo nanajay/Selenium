@@ -198,3 +198,12 @@ public class ChromeBrowserSetUp
 }
 	
 --------------------------------------------------------------------------------------------------
+
+javascript to load a page 
+	public void loadRI10JavaScript()
+	{
+			
+		js = (JavascriptExecutor) testDriver; 
+		js.executeScript("javascript:submitForm('MENUFindRiskView');");
+	}
+-------------------------------------------------------------------------------------------------------

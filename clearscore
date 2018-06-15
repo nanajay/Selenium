@@ -1,0 +1,387 @@
+
+note when using data source to set common vlues 
+if your code doesnt run, use these settings to add it to the run configuration
+1- click run 
+2 - run configuration
+3 - class path tab
+4 - select user entries
+5 - click advance 
+6 - make sure add folder checkbox is checked, then click ok button
+7 - the select your data source bundle folder and click ok
+7 - the click run button
+------------------
+package codes;
+
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.DesiredCapabilities;
+
+/*
+ * @author jadjei - Jeffrey Owusu Adjei
+ * class to set browser and its properties 
+ */
+public class BrowserSetUp 
+{
+	
+	public WebDriver testDriver = null;
+
+	//setting up chrome driver 
+	public void launchBrowser(String URL, String driverPath)
+	{
+		System.setProperty("webdriver.chrome.driver",driverPath);
+		DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("test-type");
+		capabilities.setCapability(ChromeOptions.CAPABILITY, options);
+		testDriver  = new ChromeDriver(capabilities);
+		testDriver.manage().window().maximize();
+		testDriver.navigate().to(URL);
+	}
+	
+}
+----------------------------------------------------------
+package codes;
+
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Action;
+import org.openqa.selenium.interactions.Actions;
+
+/**
+ * @author jadjei - Jeffrey Owusu Adjei
+ * Class to define generic methods to be used by other Class
+ * */
+public class JeffTestMethods
+{
+	
+	/*
+	 * Generic boolean to check if class name or css seletor is present
+	 * @Return true or false 
+	 */
+	public boolean isPresent(WebDriver driver, String cssSelectorName)
+	{
+		 if(driver.findElement(By.cssSelector(cssSelectorName)).isDisplayed())
+		 {
+			 return true;
+		 }
+		 else
+		 {
+			 return false;
+		 }
+		
+	}
+	
+	
+	//method to wait 10 seconds 
+	public void waitTenSeconds(WebDriver driver)
+	 {
+		driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+	 }
+	
+	
+	//Method to set current Score 
+	public void setCurrentScore(WebDriver driver)
+	{
+		//.cs-scalc__range-slider__input.mdl-slider.js-range-goal
+		WebElement Slider = driver.findElement(By.cssSelector(".cs-scalc__range-slider__input.mdl-slider.js-range-current"));
+		Actions moveSlider = new Actions(driver);
+		Action action = moveSlider.dragAndDropBy(Slider,-220, 0).build();
+		action.perform(); 
+	}
+	
+	//Method to retrieve class or css selector value
+	public String getValue(WebDriver driver,String cssSelectorname)
+	{
+		String s = driver.findElement(By.cssSelector(cssSelectorname)).getText();
+		return s;
+	}
+	
+	//Method to set Score Goal
+	public void setScoreGoal(WebDriver driver)
+	{
+		//.cs-scalc__range-slider__input.mdl-slider.js-range-goal
+		WebElement Slider = driver.findElement(By.cssSelector(".cs-scalc__range-slider__input.mdl-slider.js-range-goal"));
+		Actions moveSlider = new Actions(driver);
+		Action action = moveSlider.dragAndDropBy(Slider,244, 0).build();
+		action.perform(); 
+	}
+	
+	//Method to close the cookie notification message 
+	public void dismissedCookie(WebDriver driver, String cssSelectorname)
+	{
+		driver.findElement(By.cssSelector(cssSelectorname)).click();
+	}
+
+	
+	//method to get names of all cookies
+	public void checkCookies(WebDriver driver)
+	{
+		Cookie allCookies = null;
+		Set<Cookie> cookieSet = driver.manage().getCookies();
+		Iterator<Cookie> iCookie = cookieSet.iterator();
+		while (iCookie.hasNext())
+		{
+			allCookies = iCookie.next();
+			System.out.println("Name of Cookie" + allCookies +  "/n");
+			
+		}
+		
+	}
+	
+}
+----------------------------------------------------------------
+package codes;
+
+import org.testng.annotations.Test;
+
+/*
+ *@author jadjei - Jeffrey Owusu Adjei
+ *this class run the test with testng plungin 
+ */
+public class RunTest
+{
+	
+	Test1 iTest1ClearScoreWebsite = new Test1(); //creating an instance of test 1 class
+	Test3 iClearScoreSavingsCalculator = new Test3(); // creating an instance of test 3 class
+
+	@Test
+	public void doTest() 
+	{
+		iTest1ClearScoreWebsite.launchClearScoreWebsite(); 
+		iClearScoreSavingsCalculator.launchClearScoreSavingsCalculator();
+	}
+
+}
+-----------------------------------------------------------
+package codes;
+
+import java.util.ResourceBundle;
+
+/*
+ * @author jadjei - Jeffrey Owusu Adjei
+ * class to perform clear score website test cases
+ */
+public class Test1
+{
+	ResourceBundle dataSource = null;
+	BrowserSetUp iBrowsersetUp = new BrowserSetUp();
+	JeffTestMethods iAction = new JeffTestMethods();
+
+	public Test1()
+	{	
+		dataSource = ResourceBundle.getBundle("dataSource");	
+	}
+	
+	/*
+	 * method to launch clear score website
+	 * calling cookies notification message method 
+	 * calling close cookie notification message method  
+	 * calling check all cookies name method  
+	 */
+	public void launchClearScoreWebsite()
+	{		
+		iBrowsersetUp.launchBrowser(dataSource.getString("test1clearscoreURL"),dataSource.getString("ChromedriverPath") );
+		System.out.println("Test Case to check we use cookie notification is present");
+		this.checkCookieNotification();
+		iAction.dismissedCookie(iBrowsersetUp.testDriver,".accept-cookies.btn-primary.accept-btn");
+		System.out.println("Test Case to check we use cookie notification does not reaapear after being dismissed");
+		this.checkCookieNotification();
+		System.out.println("Test Case to check appripriate cookies are set");
+		iAction.checkCookies(iBrowsersetUp.testDriver);
+	}	
+	
+	/*
+	 * method to check if cookie notification message is displayed or not
+	 */
+	public void checkCookieNotification()
+	{
+		if(iAction.isPresent(iBrowsersetUp.testDriver, ".grid-12.grid-m-7"))
+		{
+			System.out.println(dataSource.getString("CookieNotificationIsPresent") );
+		}
+		else 
+		{
+			System.out.println(dataSource.getString("CookieNotificationIsNotPresent")); 
+
+		}
+		
+	}	
+}
+	
+----------------------------------------------------------
+package codes;
+
+import java.util.ResourceBundle;
+
+/*
+ * @author jadjei - Jeffrey Owusu Adjei
+ * class to perform all clear score savings calculator test
+ */
+public class Test3
+{
+	
+	ResourceBundle dataSource = null;
+	BrowserSetUp iBrowsersetUp = new BrowserSetUp();
+	JeffTestMethods iAction = new JeffTestMethods();
+
+	public Test3()
+	{	
+		dataSource = ResourceBundle.getBundle("dataSource");	
+	}
+	
+	
+	/*
+	 * this method launch clear score savings calculator and perform all the test 
+	 */
+	public void launchClearScoreSavingsCalculator()
+	{
+		iBrowsersetUp.launchBrowser(dataSource.getString("test3clearscoresavingscalculatorURL"),dataSource.getString("ChromedriverPath")); 
+		iAction.dismissedCookie(iBrowsersetUp.testDriver,".accept-cookies.btn-primary.accept-btn");
+		iAction.setCurrentScore(iBrowsersetUp.testDriver);
+		iAction.waitTenSeconds(iBrowsersetUp.testDriver);
+		iAction.setScoreGoal(iBrowsersetUp.testDriver);
+		this.checkPotentialSavings();
+		this.checkCurrentScoreInterestRate();
+		this.checkCurrentScoreCost();
+		this.checkCurrentScoreCardAvailable();
+		this.checkScoreGoalInterestRate();
+		this.checkScoreGoalCost();
+		this.checkScoreGoalCardAvailable();
+	}
+	
+	/*
+	*checking potential savings
+	*/
+	public void checkPotentialSavings()
+	{
+		if(iAction.getValue(iBrowsersetUp.testDriver, ".js-total-saving-value").equalsIgnoreCase(dataSource.getString("potentialsavings")))
+		{
+			System.out.println("potential savings is:384");
+		}
+		else
+		{
+			System.out.println("Potential savings test failed");
+		}
+	}
+	
+	
+	/*
+	 * checking current score interest rate
+	 */
+	public void checkCurrentScoreInterestRate()
+	{
+		if(iAction.getValue(iBrowsersetUp.testDriver, ".number-value.js-current-average-rate").equalsIgnoreCase(dataSource.getString("currentscorelrate")))
+		{
+			System.out.println("Current Score Interest Rate is:36.5%");
+		}
+		else
+		{
+			System.out.println("Current Score Interest Rate test failed");
+		}
+	}
+	
+	/*
+	 * checking current score cost 
+	 */
+	public void checkCurrentScoreCost()
+	{
+		if(iAction.getValue(iBrowsersetUp.testDriver, ".number-value.js-current-annual-cost").equalsIgnoreCase(dataSource.getString("currentscorecost")))
+		{
+			System.out.println("Current Score Cost is:£849");
+		}
+		else
+		{
+			System.out.println("Current Score Cost  test failed");
+		}
+	}
+	
+	
+	/*
+	 * checking current score card available 
+	 */
+	public void checkCurrentScoreCardAvailable()
+	{
+		if(iAction.getValue(iBrowsersetUp.testDriver, ".number-value.js-current-cc-available").equalsIgnoreCase(dataSource.getString("currentscorecardsavailable")))
+		{
+			System.out.println("Current Score Card is:22");
+		}
+		else
+		{
+			System.out.println("Current Score Card test failed");
+		}
+	}
+	
+	
+	/*
+	 * checking score goal interest rate 
+	 */
+	public void checkScoreGoalInterestRate()
+	{
+		if(iAction.getValue(iBrowsersetUp.testDriver, ".number-value.js-goal-average-rate").equalsIgnoreCase(dataSource.getString("scoregoalrate")))
+		{
+			System.out.println("score Goal Interest Rate is:25%");
+		}
+		else
+		{
+			System.out.println("score Goal Interest Rate test failed");
+		}
+	}
+	
+	
+	/*
+	 * checking score goal cost
+	 */
+	public void checkScoreGoalCost()
+	{
+		if(iAction.getValue(iBrowsersetUp.testDriver, ".number-value.js-goal-annual-cost").equalsIgnoreCase(dataSource.getString("scoregoalcost")))
+		{
+			System.out.println("Score Goal Cost is:£520");
+		}
+		else
+		{
+			System.out.println("Score Goal Cost test failed");
+		}
+	}
+	
+	
+	/*
+	 * checking score goal available
+	 */
+	public void checkScoreGoalCardAvailable()
+	{
+		if(iAction.getValue(iBrowsersetUp.testDriver, ".number-value.js-goal-cc-available").equalsIgnoreCase(dataSource.getString("scoregoalcardsavailable")))
+		{
+			System.out.println("Score Goal Card Available is:241");
+		}
+		else
+		{
+			System.out.println("test failed");
+		}
+	}
+	
+}
+----------------------------
+ChromedriverPath=C:\\Users\\jadjei\\JeffreyOwusuAdjei\\TestAutomation\\Chrome Latest Driver\\chromedriver.exe
+test1clearscoreURL=https://www.clearscore.com/
+test3clearscoresavingscalculatorURL=https://www.clearscore.com/savings-calculator
+CookieNotificationIsPresent =we use cookie notification is present
+CookieNotificationIsNotPresent=cookie notification is not present
+potentialsavings=384
+scoregoalrate=25
+scoregoalcost=£520
+scoregoalcardsavailable=241
+currentscorelrate=36.5
+currentscorecost=£849
+currentscorecardsavailable=22
+
+
+	
+
+

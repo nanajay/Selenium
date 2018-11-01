@@ -1,0 +1,981 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>PostbackPerformance</groupId>
+	<artifactId>PostbackPerformance</artifactId>
+	<version>0.0.1</version>
+	<name>PostbackPerformance</name>
+	<description>PostbackPerformance</description>
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.6</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>webdrivermanager</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>3.14.0</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.jexcelapi</groupId>
+			<artifactId>jxl</artifactId>
+			<version>2.6.12</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.8</version>
+		</dependency>
+
+		<!-- Oracle JDBC Libraries are held in the repo and not downloaded -->
+		<dependency>
+			<groupId>com.oracle.jdbc</groupId>
+			<artifactId>ojdbc6</artifactId>
+			<version>11.2.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/resources/lib/ojdbc6.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle.jdbc</groupId>
+			<artifactId>ojdbc7</artifactId>
+			<version>12.1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/resources/lib/ojdbc7.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>com.oracle.jdbc</groupId>
+			<artifactId>ojdbc8</artifactId>
+			<version>12.2.0.1</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/resources/lib/ojdbc8.jar</systemPath>
+		</dependency>
+
+
+	</dependencies>
+</project>
+
+****************************************************************
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.sabrefish.automationtest</groupId>
+	<artifactId>automationtests</artifactId>
+	<version>0.0.1</version>
+	<name>AutomationTest</name>
+	<description>AutomationTest</description>
+
+	<build>
+		<sourceDirectory>src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+ 	<dependencies>
+		<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>webdrivermanager</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<version>3.14.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.9.10</version>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<version>3.11.1</version>
+		</dependency>
+	</dependencies>
+</project>
+*******************************browser set up ***********************
+package automationTestCodes;
+
+import static org.testng.Assert.fail;
+import java.util.ResourceBundle;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.firefox.FirefoxProfile;
+import org.openqa.selenium.ie.InternetExplorerDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Parameters;
+import io.github.bonigarcia.wdm.WebDriverManager;
+
+
+
+public abstract class TestingBrowserSetUp 
+{
+	public WebDriver testDriver = null;
+	ResourceBundle dataSource = null;
+	LogOn iLogOn = new LogOn();
+	String testEnviroment = null;
+	String userName = null;
+	String password = null;
+
+	
+	/*
+	 * constructor for testingbrowsersetup class
+	 * initialising data source bundle 
+	 */
+	public TestingBrowserSetUp()
+	{	
+		dataSource = ResourceBundle.getBundle("dataSource");	
+	}
+	
+	/*
+	 * method for launching test environment 
+	 * @Param - testEnvironmentLink
+	 * @Param - browser
+	 * @Param - testSystem
+	 */
+	@BeforeClass
+	@Parameters({"testBrowser", "testSystem", "testEnvironment"})
+	@SuppressWarnings("deprecation")
+	public void launchBroswer( String browser,String testSystem, String testEnvironment) throws InterruptedException
+	{
+		if(browser.equalsIgnoreCase(dataSource.getString("FireFoxBrowser")))
+		{
+			WebDriverManager.firefoxdriver().arch32().setup();
+			final FirefoxProfile firefoxProfile = new FirefoxProfile();
+			firefoxProfile.setPreference("xpinstall.signatures.required", false);
+			//FirefoxOptions options = new FirefoxOptions();
+			//options.setHeadless(true);
+			this.testDriver = new FirefoxDriver();
+			this.testDriver.manage().window().maximize();
+			this.testDriver.navigate().to(getTestEnvironment(testEnvironment));
+			logOn(testSystem,testEnvironment);
+		}
+		else if(browser.equalsIgnoreCase(dataSource.getString("ChromeBrowser")))
+		{
+			WebDriverManager.chromedriver().setup();
+		    DesiredCapabilities capabilities = DesiredCapabilities.chrome();
+		    ChromeOptions options = new ChromeOptions();
+		    options.addArguments("test-type");
+		    options.setHeadless(true);
+		    capabilities.setCapability(ChromeOptions.CAPABILITY, options);
+		    this.testDriver = new ChromeDriver(capabilities);
+		    this.testDriver.manage().window().maximize();
+		    this.testDriver.navigate().to(getTestEnvironment(testEnvironment));
+		    logOn(testSystem,testEnvironment);
+			
+		}
+		else if(browser.equalsIgnoreCase(dataSource.getString("IEBrowser")))
+		{
+			WebDriverManager.iedriver().arch32().setup();
+	        DesiredCapabilities ieCapabilities = DesiredCapabilities.internetExplorer();
+	        ieCapabilities.setCapability(InternetExplorerDriver.INTRODUCE_FLAKINESS_BY_IGNORING_SECURITY_DOMAINS, true);
+	        //ieCapabilities.setCapability("requireWindowFocus", true);
+	        this.testDriver = new InternetExplorerDriver(ieCapabilities);
+	        System.out.println("Start IE");
+	        this.testDriver.manage().window().maximize();
+	        this.testDriver.navigate().to(getTestEnvironment(testEnvironment));
+			logOn(testSystem,testEnvironment);
+		}
+		else
+		{
+			fail("Not A Valid Browser - Please Check Your Browser");
+		}
+		
+	}
+	
+	/*
+	 * method to log onto the test environment 
+	 * @Param - testSystem
+	 * @Param - testEnvironment
+	 */
+	private void logOn(String testSystem, String testEnvironment) throws InterruptedException
+	{
+		iLogOn.signOn(this.testDriver, 
+					getUsername(testEnvironment, testSystem), 
+					getPassword(testEnvironment, testSystem));
+		iLogOn.forceLogIn(getDriver());
+		Thread.sleep(100);	
+	}
+	
+	/*
+	 * method returning systest environment 
+	 * @Param - testEnvironment 
+	 */
+	private String getTestEnvironment(String testEnvironment)
+	{
+		if(testEnvironment.equalsIgnoreCase("FEATURE001"))
+		{
+			testEnviroment = dataSource.getString("Feature01StagingURL");
+		}
+		else if(testEnvironment.equalsIgnoreCase("FEATURE002"))
+		{
+			testEnviroment = dataSource.getString("Feature02StagingURL");
+		}
+		else if(testEnvironment.equalsIgnoreCase("FEATURE003"))
+		{
+			testEnviroment = dataSource.getString("Feature03StagingURL");
+		}
+		else if(testEnvironment.equalsIgnoreCase("coreaccounts"))
+		{
+			testEnviroment = dataSource.getString("CoreAccountsStagingURL");
+		}
+		else if(testEnvironment.equalsIgnoreCase("nexusaccounts"))
+		{
+			testEnviroment = dataSource.getString("NexusAccountsStagingURL");
+		}
+		else
+		{
+			fail("Not A Valid Test Environment - Please Check Your Browser");
+		}
+		return testEnviroment;
+		
+	}
+	
+	/*
+	 * method returning username 
+	 * @Param - testEnvironment 
+	 * @Param - testSystem - example broker portal or underwriter side
+	 */
+	private String getUsername(String testEnvironment, String testSystem)
+	{
+		if(testEnvironment.equalsIgnoreCase("FEATURE001"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				userName = dataSource.getString("Feature01UnderWriterStagingUserName");
+			}
+			else
+			{
+				userName = dataSource.getString("Feature01BrokerPortalStagingUserName");
+			}
+		}
+		else if(testEnvironment.equalsIgnoreCase("FEATURE002"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				userName = dataSource.getString("Feature02UnderWriterStagingUserName");
+			}
+			else
+			{
+				userName = dataSource.getString("Feature02BrokerPortalStagingUserName");
+			}
+		}
+		else if(testEnvironment.equalsIgnoreCase("FEATURE003"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				userName = dataSource.getString("Feature03UnderWriterStagingUserName");
+			}
+			else
+			{
+				userName = dataSource.getString("Feature03BrokerPortalStagingUserName");
+			}
+		}
+		else if(testEnvironment.equalsIgnoreCase("coreaccounts"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				userName = dataSource.getString("CoreAccountsUnderWriterStagingUserName");
+			}
+			else
+			{
+				userName = dataSource.getString("CoreAccountsBrokerPortalStagingUserName");
+			}
+		}
+		else if(testEnvironment.equalsIgnoreCase("nexusaccounts"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				userName = dataSource.getString("NexusAccountsUnderWriterStagingUserName");
+			}
+			else
+			{
+				userName = dataSource.getString("NexusAccountsBrokerPortalStagingUserName");
+			}
+		}
+		else
+		{
+			fail("Not A Valid Test Environment - Please Check Your Browser");
+		}
+		return userName;
+		
+	}
+	
+	/*
+	 * method returning the driver that has been initialised at test 
+	 */
+	public WebDriver getDriver()
+	{
+		return testDriver;
+		
+	}
+	
+	/*
+	 * method returning user password
+	 * @Param - testEnvironment 
+	 * @Param - testSystem, example underwiter or brokerporatl 
+	 */
+	private String getPassword(String testEnvironment, String testSystem)
+	{
+		if(testEnvironment.equalsIgnoreCase("FEATURE001"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				password = dataSource.getString("Feature01UnderWriterStagingPassword");
+			}
+			else
+			{
+				password = dataSource.getString("Feature01BrokerPortalStagingPassword");
+			}
+		}
+		else if(testEnvironment.equalsIgnoreCase("FEATURE002"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				password = dataSource.getString("Feature02UnderWriterStagingPassword");
+			}
+			else
+			{
+				password = dataSource.getString("Feature02BrokerPortalStagingPassword");
+			}
+		}
+		else if(testEnvironment.equalsIgnoreCase("FEATURE003"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				password = dataSource.getString("Feature03UnderWriterStagingPassword");
+			}
+			else
+			{
+				password = dataSource.getString("Feature03BrokerPortalStagingPassword");
+			}
+		}
+		else if(testEnvironment.equalsIgnoreCase("coreaccounts"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				password = dataSource.getString("CoreAccountsUnderWriterStagingPassword");
+			}
+			else
+			{
+				password = dataSource.getString("CoreAccountsBrokerPortalStagingPassword");
+			}
+		}
+		else if(testEnvironment.equalsIgnoreCase("nexusaccounts"))
+		{
+			if(testSystem.equalsIgnoreCase("UW"))
+			{
+				password = dataSource.getString("NexusAccountsUnderWriterStagingPassword");
+			}
+			else
+			{
+				password = dataSource.getString("NexusAccountsBrokerPortalStagingPassword");
+			}
+		}
+		else
+		{
+			fail("Not A Valid Test Environment - Please Check Your Browser");
+		}
+		return password;
+		
+	}
+	
+	/*  
+     * Tear down the setup after test completes
+     */
+    @AfterClass
+    public void closeDriverAfterTest()
+    {
+   	 	getDriver().quit();
+   	 	
+    }
+
+}
+***********************common methods***********************
+package automationTestCodes;
+
+import static org.testng.Assert.fail;
+
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.concurrent.TimeUnit;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.interactions.Actions;
+
+
+
+public class CommonActions
+{
+	ResourceBundle dataSource = null;
+	ScreenShotOnFailure iScreenShotOnFailure = new ScreenShotOnFailure();
+	
+	public CommonActions()
+	{
+		dataSource = ResourceBundle.getBundle("dataSource");	
+	}
+	
+	/*
+	 * this method load RI10 - Find Risk
+	 * It simulate a user selecting search risk from risk menu item 
+	 */
+	public void loadRI10(WebDriver driver)
+	{
+		JavascriptExecutor js = null;
+		js = (JavascriptExecutor) driver; 
+		js.executeScript("javascript:submitForm('MENUFindRiskView');");
+	}
+	
+	/*
+	 * this method load RI01 
+	 * It simulate a user selecting NEW risk from risk menu item 
+	 */
+	public void loadRI01(WebDriver driver)
+	{
+		JavascriptExecutor js = null;
+		js = (JavascriptExecutor) driver; 
+		js.executeScript("javascript:submitForm('MENURiskBasicView');");
+	}
+	
+	/*
+	 * this method load CL20 - Notification 
+	 * It simulate a user selecting NEW notification from claim menu item 
+	 */
+	public void loadCL20Notification(WebDriver driver)
+	{
+		JavascriptExecutor js = null;
+		js = (JavascriptExecutor) driver; 
+		js.executeScript("javascript:submitForm('MENUNewClaimView');");
+	}
+	
+	/*
+	 * method to wait before page load
+	*/
+	public void waitTenSeconds(WebDriver driver) 
+	  {
+		driver.manage().timeouts().implicitlyWait(100000000, TimeUnit.SECONDS);
+	  }
+	
+
+	/*
+	 * method to log out underwriter 
+	 */
+	public void underwriterLogOut(WebDriver driver)
+	{
+		driver.findElement(By.className("btn_lnk_MENULogoutView"));
+	}
+	
+	/*
+	 * method to select an item from bootstrap drodpwn 
+	 * @Param driver
+	 * @Param xpath
+	 * @Param cssSelector
+	 * @Param dropdown Item Name
+	 */
+	public void selectItemFromBoostrapDropdownByName(WebDriver driver, String xpath, String cssSelector, String itemName)
+	{
+		boolean elementFound = false;
+	    driver.findElement(By.xpath(xpath)).click();
+	    Long start = System.currentTimeMillis();
+	    Long d = System.currentTimeMillis() - start;
+		while (!elementFound && d < 10000)
+		{ try
+			{
+				java.util.List<WebElement> as = driver.findElements(
+						(By.cssSelector(cssSelector)));
+				for (WebElement a : as) 
+				{
+
+					if (a.getText().equals(itemName))
+					{
+						a.click(); 
+						elementFound = true;
+						break;
+					}
+				} break; } catch (NoSuchElementException e) {}
+				catch (WebDriverException e){}}
+		if ( !elementFound ) {
+			fail();
+		}
+	}
+	
+	/*
+	 * Method to select an item from bootstrap dropdown
+	 * when there are more than one dropdown fields on the page or screen 
+	 * @Param driver - webdriver 
+	 * @Param xpath - the path of the dropdonw item
+	 * @Param index - this identify a particular dropdown on a page or screen
+	 * @Param cssSelector - cssSelector that holds the dropdown list items 
+	 * @Param itemName - dropdown value name 
+	 */
+	public void selectItemFromBoostrapDropdownByIndex(WebDriver driver, String xpath, int index, String cssSelector,  String itemName)
+	{
+		boolean elementFound = false;
+		driver.findElements(By.xpath(xpath)).get(index).click();//clicking the top level dropdown 
+	    Long start = System.currentTimeMillis();//getting the current time
+		Long d = System.currentTimeMillis()-start;
+		while (!elementFound && d < 10000) //it would come out of the loop if the current time is more than 10seconds 
+		{ try
+			{
+				java.util.List<WebElement> as = driver.findElements(
+						(By.cssSelector(cssSelector)));
+				for (WebElement a : as) 
+				{
+
+					if (a.getText().equals(itemName))
+					{
+						a.click(); 
+						elementFound = true;
+						break;
+					}
+				} break; } catch (NoSuchElementException e) {}
+				catch (WebDriverException e){}}
+		if ( !elementFound ) {
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	
+	
+	/*
+	 * Method to select an item from bootstrap dropdown
+	 * when there are more than one dropdown fields on the page or screen 
+	 * @Param driver - webdriver 
+	 * @Param xpath - the path of the dropdonw item
+	 * @Param index - this identify a particular dropdown on a page or screen
+	 * @Param cssSelector - cssSelector that holds the dropdown list items 
+	 * @Param itemName - dropdown value name 
+	 */
+	public void selectItemFromBoostrapDropdownByIndexByXpath(WebDriver driver, String xpath, String listItemXpath, int index, String itemName)
+	{
+		boolean elementFound = false;
+		driver.findElements(By.xpath(xpath)).get(index).click();//clicking the top level dropdown 
+	    Long start = System.currentTimeMillis();//getting the current time
+		Long d = System.currentTimeMillis()-start;
+		while (!elementFound && d < 10000) //it would come out of the loop if the current time is more than 10seconds 
+		{ try
+			{
+				java.util.List<WebElement> as = driver.findElements(
+						(By.xpath(listItemXpath)));
+				for (WebElement a : as) 
+				{
+
+					if (a.getText().equals(itemName))
+					{
+						a.click(); 
+						elementFound = true;
+						break;
+					}
+				} break; } catch (NoSuchElementException e) {}
+				catch (WebDriverException e){}}
+		if ( !elementFound ) {
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	/*
+	 * method to click on a filed if its present 
+	 * @Param driver - webdriver
+	 * @Param xpath - path of the field 
+	 */
+	public void clickWhenPresent(WebDriver driver, String xpath)
+	{
+		boolean elementFound = false;
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;
+		while (!elementFound && d < 10000) 
+		{ 
+			try {
+				driver.findElement(By.xpath(xpath)).click();				
+				elementFound = true;
+				
+			} catch (Exception e) {
+				// Ignoring not found exceptions as handled outside of this functionality
+			}
+		}
+		
+		if ( !elementFound ) {
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	/*
+	 * method to click on a filed if its present 
+	 * @Param driver - webdriver
+	 * @Param xpath - path of the field 
+	 * @Param index - the index of the dropdown 
+	 */
+	public void clickWhenPresentByIndex(WebDriver driver, String xpath, int index)
+	{
+		boolean elementFound = false;
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;
+		while (!elementFound && d < 10000) 
+		{ 
+			try {
+				driver.findElements(By.xpath(xpath)).get(index).click();//clicking the top level dropdown 			
+				elementFound = true;
+				
+			} catch (Exception e) {
+				// Ignoring not found exceptions as handled outside of this functionality
+			}
+		}
+		
+		if ( !elementFound ) {
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	/*
+	 * method to select an item from dropdown list if its present 
+	 * @Param driver - webdriver
+	 * @Param cssSelector - cssSelector of the field 
+	 * @Param itemName - name of the dropdown list item
+	 */
+	public void selectWhenPresent(WebDriver driver, String cssSelector, String itemName)
+	{
+		boolean elementFound = false;
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;
+		while (!elementFound && d < 10000) //it would come out of the loop if the current time is more than 10seconds 
+		{ try
+			{
+				java.util.List<WebElement> as = driver.findElements(
+						(By.cssSelector(cssSelector)));
+				for (WebElement a : as) 
+				{
+
+					if (a.getText().equals(itemName))
+					{
+						a.click(); 
+						elementFound = true;
+						break;
+					}
+				} break; } catch (NoSuchElementException e) {}
+				catch (WebDriverException e){}}
+		if ( !elementFound ) {
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	/*
+	 * method to enter test data when present 
+	 * @Param driver - webdriver
+	 * @Param xpath - path of the field 
+	 * @Param testData - data to be enetred in the field 
+	 */
+	public void enterDataWhenPresent(WebDriver driver, String xpath, String testData)
+	{
+		boolean elementFound = false;
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;
+		while (!elementFound && d < 10000)  
+		{ 
+			try {
+				driver.findElement(By.xpath(xpath)).sendKeys(testData);				
+				elementFound = true;
+				
+			} catch (Exception e) {
+				// Ignoring not found exceptions as handled outside of this functionality
+			}
+		}
+		
+		if ( !elementFound ) 
+		{
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	/*
+	 * method to enter test data when present 
+	 * @Param driver - webdriver
+	 * @Param xpath - path of the field 
+	 */
+	public void deleteTableRowWhenPresent(WebDriver driver, String xpath)
+	{
+		boolean elementFound = false;
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;
+		while (!elementFound && d < 10000)  
+		{ 
+			try {
+				driver.findElement(By.xpath(xpath)).click();				
+				elementFound = true;
+				
+			} catch (Exception e) {
+				// Ignoring not found exceptions as handled outside of this functionality
+			}
+		}
+		
+		if ( !elementFound ) 
+		{
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	/*
+	 * method to clear field data when present 
+	 * @Param driver - webdriver
+	 * @Param xpath - path of the field 
+	 * 
+	 */
+	public void clearDataWhenPresent(WebDriver driver, String xpath)
+	{
+		boolean elementFound = false;
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;
+		while (!elementFound && d < 10000) 
+		{ 
+			try {
+				driver.findElement(By.xpath(xpath)).clear();				
+				elementFound = true;
+				
+			} catch (Exception e) {
+				// Ignoring not found exceptions as handled outside of this functionality
+			}
+		}
+		
+		if ( !elementFound ) 
+		{
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	
+	/*
+	 * @Param - webdriver driver
+	 * this method simulate navigating to RI02 from RI01
+	 */
+	public void selectQuoteOnRI05(WebDriver driver, String quoteNo) throws InterruptedException
+	{
+		driver.findElement(By.linkText(quoteNo)).click();
+		Thread.sleep(1000);
+	}
+	
+	/*
+	 * 
+	 */
+	public void actionClickSearch(WebDriver driver, String path, String search)
+	{
+		long start = System.currentTimeMillis();
+		while (System.currentTimeMillis()-start < 10000) { try {
+			List<WebElement> as = driver.findElements(By.xpath(path));
+			for (WebElement a : as) 
+			{
+				//String test1=a.getText();
+				//int test2 = as.size();
+				if (a.getText().equals(search))
+				{
+					a.click(); 
+					break;
+				}
+			} break; } catch (NoSuchElementException e) {}
+			catch (WebDriverException e){}}
+	}
+	
+	/*
+	 * 
+	 */
+	public void clickAddButtonOnModalWhenPresent(WebDriver driver, String xpath)
+	{
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;	
+		while (d < 10000)
+		{ 
+			try 
+			{
+				List<org.openqa.selenium.WebElement>	elements = driver.findElements(By.xpath(xpath));
+				int x = 1;
+				for (org.openqa.selenium.WebElement opt : elements) 
+				{
+					if (x == 2) 
+					{
+						opt.click();
+						break;
+					}
+					x++;
+				}	 break; } catch (Exception e) {}}
+
+
+	}
+	
+	
+	/*
+	 * method to click on a filed if its present 
+	 * @Param driver - webdriver
+	 * @Param xpath - path of the field 
+	 */
+	public void continueOnRI01(WebDriver driver, String xpath)
+	{
+		boolean elementFound = false;
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;
+		while (!elementFound && d < 10000) 
+		{ 
+			try {
+				driver.findElement(By.xpath(xpath)).sendKeys(" ");				
+				elementFound = true;
+				
+			} catch (Exception e) {
+				// Ignoring not found exceptions as handled outside of this functionality
+			}
+		}
+		
+		if ( !elementFound ) {
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	
+	/*
+	 * checking if row in a table exist
+	 * @Param - Driver
+	 * @Param - xpath
+	 */
+	public boolean checkIfTableRowExist(WebDriver driver,String xpath)
+	{
+		boolean s = driver.findElement(
+				By.xpath(xpath)).isDisplayed();
+		if(s == true)
+		{return true;}
+		else
+		{
+		return false;}
+	}
+	
+	
+	public void waitForPageToLoad() throws InterruptedException
+	{
+		Thread.sleep(5000);
+	}
+
+	public void waitTenSeconds() throws InterruptedException
+	{
+		Thread.sleep(10000);
+	}
+	
+	public void waitFiveSeconds() throws InterruptedException
+	{
+		Thread.sleep(10000);
+	}
+	
+	public void selectMaintainBankAccountItemFromMenu(WebDriver driver) throws InterruptedException
+    {
+		WebElement data = driver.findElement(By.id("LEVEL0_DATA"));
+        WebElement maintainBankAccount =  driver.findElement(By.id("LEVEL1_DATA_MAINTAINBANKACCTS"));
+        Actions act = new Actions(driver);
+        act.moveToElement(data).perform();
+        Thread.sleep(1000);//waiting 9seconds 
+        act.moveToElement(maintainBankAccount).click().build().perform();
+        Thread.sleep(1000);//waiting 9seconds 
+    }
+
+	/*
+	 * method to enter test data when present 
+	 * @Param driver - webdriver
+	 * @Param xpath - path of the field 
+	 * @Param testData - data to be enetred in the field 
+	 */
+	public void enterDataWhenPresentByName(WebDriver driver, String name, String testData)
+	{
+		boolean elementFound = false;
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;
+		while (!elementFound && d < 10000)  
+		{ 
+			try {
+				driver.findElement(By.xpath(name)).sendKeys(testData);				
+				elementFound = true;
+				
+			} catch (Exception e) {
+				// Ignoring not found exceptions as handled outside of this functionality
+			}
+		}
+		
+		if ( !elementFound ) 
+		{
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+	}
+	
+	/*
+	 * method to enter test data when present 
+	 * @Param driver - webdriver
+	 * @Param xpath - path of the field 
+	 */
+	public String findTableColumnNameWhenPresent(WebDriver driver, String xpath)
+	{
+		String s = null;
+		boolean elementFound = false;
+		Long start = System.currentTimeMillis();
+		Long d = System.currentTimeMillis()-start ;
+		while (!elementFound && d < 10000)  
+		{ 
+			try {
+				 s = driver.findElement(By.xpath(xpath)).getTagName();				
+				elementFound = true;
+				
+			} catch (Exception e) {
+				// Ignoring not found exceptions as handled outside of this functionality
+			}
+		}
+		
+		if ( !elementFound ) 
+		{
+			//iScreenShotOnFailure.takeScreenshot();
+			fail();
+		}
+		return s;
+	}
+	
+}
+
+
